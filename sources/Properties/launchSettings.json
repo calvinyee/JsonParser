@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "JsonParser": {
+      "commandName": "Project",
+      "commandLineArgs": "input.txt output.txt"
+    }
+  }
+}
