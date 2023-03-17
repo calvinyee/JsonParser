@@ -37,27 +37,12 @@ foreach (var line in lines)
     {
         newSubItem = true;
         subItem = new Item() { name = names[0], tagType = "Folder" };
-    }
-    bool newSubItem1 = false;
-    var subItem1 = FindItem(subItem.tags, names[1]);
-    if (subItem1 == null)
-    {
-        newSubItem1 = true;
-        subItem1 = new Item() { name = names[1], tagType = "Folder" };
-    }
-    if (subItem1.tags == null)
-    {
-        subItem1.tags = new List<object>();
-    }
-    subItem1.tags.Add(new Tag() { name = names[1], opcItemPath =  string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23])});    
+    }  
+    
     if (subItem.tags == null)
     {
         subItem.tags = new List<object>();
-    }
-    if (newSubItem1)
-    {
-        subItem.tags.Add(subItem1);
-    }
+    }   
 
     if (item.tags == null)
     {
@@ -67,6 +52,13 @@ foreach (var line in lines)
     {
         item.tags.Add(subItem);
     }
+    var alarms = new List<Alarm>
+    {
+        new Alarm() { name = words[1], notes = words[2], label = words[18], displayPath = new DisplayPath() { value = words[2] }  }
+    };
+    subItem.tags.Add(new Tag() { name = names[1], 
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
+        alarms = alarms});
 }
 
 var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore});
@@ -99,9 +91,26 @@ class Tag
     public string? valueSource { get; set; } = "opc";
     public string? opcItemPath { get; set; }
     public string? dataType { get; set; } = "Boolean";
+    public List<Alarm> alarms { get; set; } = new List<Alarm>();
     public string? name { get; set; }
     public string? tagType  { get; set; } = "AtomicTag";
     public string? opcServer { get; set; } = "Ignition OPC UA Server";
+}
+
+public class Alarm
+{
+    public float setpointA { get; set; } = 1.0f;
+    public string? notes { get; set; }
+    public string? name { get; set; }
+    public string? label { get; set; }
+    public string? priority { get; set; } = "High";
+    public DisplayPath? displayPath { get;set;}
+}
+
+public class DisplayPath
+{
+    public string? bindType { get; set; } = "Expression";
+    public string? value { get; set; }
 }
 
 
