@@ -54,10 +54,10 @@ foreach (var line in lines)
     }
     var alarms = new List<Alarm>
     {
-        new Alarm() { name = words[1], notes = words[2], label = words[18], displayPath = new DisplayPath() { value = words[2] }  }
+        new Alarm() { name = names[1], notes = words[2], label = words[18], displayPath = new DisplayPath()  }
     };
     subItem.tags.Add(new Tag() { name = names[1], 
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", "M30_PLC5", words[23]),
         alarms = alarms});
 }
 
@@ -103,14 +103,14 @@ public class Alarm
     public string? notes { get; set; }
     public string? name { get; set; }
     public string? label { get; set; }
-    public string? priority { get; set; } = "High";
+    public string? priority { get; set; } = "Medium";
     public DisplayPath? displayPath { get;set;}
 }
 
 public class DisplayPath
 {
     public string? bindType { get; set; } = "Expression";
-    public string? value { get; set; }
+    public string? value { get; set; } = "{notes}";
 }
 
 
