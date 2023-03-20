@@ -52,10 +52,14 @@ foreach (var line in lines)
     {
         item.tags.Add(subItem);
     }
-    var alarms = new List<Alarm>
+    List<Alarm>? alarms = null;
+    if (words[6] != "F")
     {
-        new Alarm() { name = names[1], notes = words[2], label = words[18], displayPath = new DisplayPath()  }
-    };
+        alarms = new List<Alarm>
+        {
+            new Alarm() { name = names[1], notes = words[2], label = words[18], displayPath = new DisplayPath()  }
+        };
+    }
     subItem.tags.Add(new Tag() { name = names[1], 
         opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", "M30_PLC5", words[23]),
         alarms = alarms});
@@ -91,7 +95,7 @@ class Tag
     public string? valueSource { get; set; } = "opc";
     public string? opcItemPath { get; set; }
     public string? dataType { get; set; } = "Boolean";
-    public List<Alarm> alarms { get; set; } = new List<Alarm>();
+    public List<Alarm>? alarms { get; set; }
     public string? name { get; set; }
     public string? tagType  { get; set; } = "AtomicTag";
     public string? opcServer { get; set; } = "Ignition OPC UA Server";
