@@ -66,7 +66,7 @@ foreach (var line in lines)
 }
 
 var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore});
-File.WriteAllText(output, json);
+File.WriteAllText(output, json.Replace("\\\\", "\\"));
 
 Console.WriteLine(output + " was created successfully");
 Console.ReadLine();
