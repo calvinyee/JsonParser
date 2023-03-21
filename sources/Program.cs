@@ -1,14 +1,13 @@
 ﻿using Newtonsoft.Json;
 
-if (args.Length < 2)
+if (args.Length < 1)
 {
-    Console.WriteLine("Set input and output filenames like: JsonParser.exe input.txt output.txt");
+    Console.WriteLine("Set input filename: JsonParser.exe input.txt");
     Console.ReadLine();
     return;
 }
 
 var input = args[0];
-var output = args[1];
 if (!File.Exists(input))
 {
     Console.WriteLine(input + " is not found");
@@ -17,7 +16,7 @@ if (!File.Exists(input))
 }
 var lines = File.ReadAllLines(input);
 
-Item item = new Item() { name= "", tagType="Provider"};
+List<object> items = new List<object>();
 
 foreach (var line in lines)
 {
@@ -32,7 +31,7 @@ foreach (var line in lines)
         continue;
     }
     bool newSubItem = false;
-    var subItem = FindItem(item.tags, names[0]);
+    var subItem = FindItem(items, names[0]);
     if (subItem == null)
     {
         newSubItem = true;
@@ -42,15 +41,10 @@ foreach (var line in lines)
     if (subItem.tags == null)
     {
         subItem.tags = new List<object>();
-    }   
-
-    if (item.tags == null)
-    {
-        item.tags = new List<object>();
-    }
+    }     
     if (newSubItem)
     {
-        item.tags.Add(subItem);
+        items.Add(subItem);
     }
     List<Alarm>? alarms = null;
     if (words[6] != "F")
@@ -60,15 +54,23 @@ foreach (var line in lines)
             new Alarm() { name = names[1], notes = words[2], label = words[18], displayPath = new DisplayPath()  }
         };
     }
-    subItem.tags.Add(new Tag() { name = names[1], 
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", "M30_PLC5", words[23]),
-        alarms = alarms});
+    var subItem1 = new Item() { name = names[1], tagType = "Folder" };
+    subItem1.tags = new List<object> { new Tag() { name = names[1],
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
+        alarms = alarms } };
+
+    subItem.tags.Add(subItem1);
 }
 
-var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore});
-File.WriteAllText(output, json.Replace("\\\\", "\\"));
+int i = 1;
+foreach (var item in items)
+{
+    var name = (item as Item).name + ".txt";
+    var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+    File.WriteAllText(name, json.Replace("\\\\", "\\"));
 
-Console.WriteLine(output + " was created successfully");
+    Console.WriteLine(name + " was created successfully");
+}
 Console.ReadLine();
 
 Item? FindItem(List<object>? items, string name)
