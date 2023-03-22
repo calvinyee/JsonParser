@@ -49,9 +49,12 @@ foreach (var line in lines)
     List<Alarm>? alarms = null;
     if (words[6] != "F")
     {
+        var note = words[2];
         alarms = new List<Alarm>
         {
-            new Alarm() { name = names[1], notes = words[2], label = words[18], displayPath = new DisplayPath()  }
+            new Alarm() { name = names[1], notes = note, label = words[18],
+                priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium",
+                displayPath = new DisplayPath() }
         };
     }
     var subItem1 = new Item() { name = names[1], tagType = "Folder" };
@@ -62,7 +65,6 @@ foreach (var line in lines)
     subItem.tags.Add(subItem1);
 }
 
-int i = 1;
 foreach (var item in items)
 {
     var name = (item as Item).name + ".txt";
