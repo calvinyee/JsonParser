@@ -57,12 +57,19 @@ foreach (var line in lines)
                 displayPath = new DisplayPath() }
         };
     }
-    var subItem1 = new Item() { name = names[1], tagType = "Folder" };
-    subItem1.tags = new List<object> { new Tag() { name = names[1],
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
-        alarms = alarms } };
 
-    subItem.tags.Add(subItem1);
+    var name = names[1];
+    if (names.Length > 2)
+    {
+        name += "_" + names[2];
+    }
+
+    subItem.tags.Add(new Tag()
+    {
+        name = name,
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
+        alarms = alarms
+    });
 }
 
 foreach (var item in items)
