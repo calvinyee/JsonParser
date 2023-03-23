@@ -26,6 +26,10 @@ Item item = new Item() { name = "", tagType = "Provider", tags = new List<object
 
 foreach (var line in lines)
 {
+    if (line.StartsWith(";"))
+    {
+        continue;
+    }
     var words = line.Split(',');
     if (words.Length < 30)
     {
@@ -64,13 +68,20 @@ foreach (var line in lines)
         name += "_" + names[2];
     }
 
+    var almName = name;
+    if (!string.IsNullOrEmpty(almName))
+    {
+        almName += "_";
+    }
+    almName += "ALM";
+
     List<Alarm>? alarms = null;
     if (words[6] != "F")
     {
         var note = words[2];
         alarms = new List<Alarm>
         {
-            new Alarm() { name = name, notes = note, label = words[18],
+            new Alarm() { name = almName, notes = note, label = words[18],
                 priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium",
                 displayPath = new DisplayPath() }
         };
