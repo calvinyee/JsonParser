@@ -2,7 +2,7 @@
 
 if (args.Length < 1)
 {
-    Console.WriteLine("Set input filename: JsonParser.exe input.txt");
+    Console.WriteLine("Set input filename and optionally output filename: JsonParser.exe input.txt output.json");
     Console.ReadLine();
     return;
 }
@@ -14,9 +14,15 @@ if (!File.Exists(input))
     Console.ReadLine();
     return;
 }
+var output = Path.GetFileNameWithoutExtension(input) + ".json";
+if (args.Length > 1)
+{
+    output = args[1];
+}
+
 var lines = File.ReadAllLines(input);
 
-List<object> items = new List<object>();
+Item item = new Item() { name = "", tagType = "Provider", tags = new List<object>() };
 
 foreach (var line in lines)
 {
@@ -28,10 +34,15 @@ foreach (var line in lines)
     var names = words[1].Split('\\');
     if (names.Length < 2)
     {
-        continue;
+        if (names.Length == 1)
+        {
+            names = new string[2] { "General", names[0] };
+        }
+        else
+            continue;
     }
     bool newSubItem = false;
-    var subItem = FindItem(items, names[0]);
+    var subItem = FindItem(item.tags, names[0]);
     if (subItem == null)
     {
         newSubItem = true;
@@ -44,18 +55,7 @@ foreach (var line in lines)
     }     
     if (newSubItem)
     {
-        items.Add(subItem);
-    }
-    List<Alarm>? alarms = null;
-    if (words[6] != "F")
-    {
-        var note = words[2];
-        alarms = new List<Alarm>
-        {
-            new Alarm() { name = names[1], notes = note, label = words[18],
-                priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium",
-                displayPath = new DisplayPath() }
-        };
+        item.tags.Add(subItem);
     }
 
     var name = names[1];
@@ -63,6 +63,18 @@ foreach (var line in lines)
     {
         name += "_" + names[2];
     }
+
+    List<Alarm>? alarms = null;
+    if (words[6] != "F")
+    {
+        var note = words[2];
+        alarms = new List<Alarm>
+        {
+            new Alarm() { name = name, notes = note, label = words[18],
+                priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium",
+                displayPath = new DisplayPath() }
+        };
+    }   
 
     subItem.tags.Add(new Tag()
     {
@@ -72,14 +84,12 @@ foreach (var line in lines)
     });
 }
 
-foreach (var item in items)
-{
-    var name = (item as Item).name + ".txt";
-    var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-    File.WriteAllText(name, json.Replace("\\\\", "\\"));
 
-    Console.WriteLine(name + " was created successfully");
-}
+var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+File.WriteAllText(output, json.Replace("\\\\", "\\"));
+
+Console.WriteLine(output + " was created successfully");
+
 Console.ReadLine();
 
 Item? FindItem(List<object>? items, string name)
