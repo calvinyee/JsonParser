@@ -35,6 +35,10 @@ foreach (var line in lines)
     {
         continue;
     }
+    if (!words[22].Contains("DTS-R"))
+    {
+        continue;
+    }
     var names = words[1].Split('\\');
     if (names.Length < 2)
     {
