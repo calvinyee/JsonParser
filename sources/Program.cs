@@ -101,6 +101,7 @@ foreach (var line in lines)
 
 
 var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+json = json.Replace("S:", "S2:");
 File.WriteAllText(output, json.Replace("\\\\", "\\"));
 
 Console.WriteLine(output + " was created successfully");
