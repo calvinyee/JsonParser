@@ -2,7 +2,7 @@
 
 if (args.Length < 1)
 {
-    Console.WriteLine("Set input filename and optionally output filename: JsonParser.exe input.txt output.json");
+    Console.WriteLine("Set input filename: JsonParser.exe input.txt");
     Console.ReadLine();
     return;
 }
@@ -14,15 +14,9 @@ if (!File.Exists(input))
     Console.ReadLine();
     return;
 }
-var output = Path.GetFileNameWithoutExtension(input) + ".json";
-if (args.Length > 1)
-{
-    output = args[1];
-}
-
 var lines = File.ReadAllLines(input);
 
-Item item = new Item() { name = "", tagType = "Provider", tags = new List<object>() };
+Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
 
 foreach (var line in lines)
 {
@@ -49,6 +43,14 @@ foreach (var line in lines)
         else
             continue;
     }
+    Item item;
+    if (!itemDict.ContainsKey(words[22]))
+    {
+        itemDict.Add(words[22], new Item() { name = "", tagType = "Provider", tags = new List<object>() });
+    }
+    
+    item = itemDict[words[22]];
+
     bool newSubItem = false;
     var subItem = FindItem(item.tags, names[0]);
     if (subItem == null)
@@ -99,12 +101,14 @@ foreach (var line in lines)
     });
 }
 
+foreach (var pair in itemDict)
+{
+    var json = JsonConvert.SerializeObject(pair.Value, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+    json = json.Replace("S:", "S2:");
+    File.WriteAllText(pair.Key + ".json", json.Replace("\\\\", "\\"));
 
-var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-json = json.Replace("S:", "S2:");
-File.WriteAllText(output, json.Replace("\\\\", "\\"));
-
-Console.WriteLine(output + " was created successfully");
+    Console.WriteLine(pair.Key + ".json" + " was created successfully");
+}
 
 Console.ReadLine();
 
