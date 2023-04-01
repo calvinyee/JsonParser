@@ -20,6 +20,7 @@ Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
 
 foreach (var line in lines)
 {
+    bool rejected = false;
     if (line.StartsWith(";"))
     {
         continue;
@@ -29,9 +30,13 @@ foreach (var line in lines)
     {
         continue;
     }
-    if (!words[22].Contains("DTS-R"))
+    //if (!words[22].Contains("DTS-R"))
+    //{
+    //    continue;
+    //}
+    if (!words[23].Contains(':'))
     {
-        continue;
+        rejected = true;
     }
     var names = words[1].Split('\\');
     if (names.Length < 2)
@@ -43,13 +48,16 @@ foreach (var line in lines)
         else
             continue;
     }
+
+    string key = rejected ? "Non-PLC5" : words[22];
+
     Item item;
-    if (!itemDict.ContainsKey(words[22]))
+    if (!itemDict.ContainsKey(key))
     {
-        itemDict.Add(words[22], new Item() { name = "", tagType = "Provider", tags = new List<object>() });
+        itemDict.Add(key, new Item() { name = "", tagType = "Provider", tags = new List<object>() });
     }
     
-    item = itemDict[words[22]];
+    item = itemDict[key];
 
     bool newSubItem = false;
     var subItem = FindItem(item.tags, names[0]);
