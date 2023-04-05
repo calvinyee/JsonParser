@@ -16,107 +16,56 @@ if (!File.Exists(input))
 }
 var lines = File.ReadAllLines(input);
 
-Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
+Item item = new Item() { name = "", tagType = "Provider", tags = new List<object>() };
+Item item1 = new Item() { name = "", tagType = "Alarm", tags = new List<object>() };
 
 foreach (var line in lines)
-{
-    bool rejected = false;
+{    
     if (line.StartsWith(";"))
     {
         continue;
     }
     var words = line.Split(',');
-    if (words.Length < 30)
+    if (words.Length < 3)
     {
         continue;
     }
-    //if (!words[22].Contains("DTS-R"))
-    //{
-    //    continue;
-    //}
-    if (!words[23].Contains(':'))
+
+    string name = words[0];
+    string alarm = words[1];
+    string address = words[2];
+
+    if (string.IsNullOrEmpty(name))
+        continue;
+
+    if (name == "Name")
+        continue;
+
+    List<Alarm> alarms = new List<Alarm>
     {
-        rejected = true;
-    }
-    var names = words[1].Split('\\');
-    if (names.Length < 2)
-    {
-        if (names.Length == 1)
+        new Alarm()
         {
-            names = new string[2] { "General", names[0] };
+            notes = alarm,
+            name = name + "_ALM",
         }
-        else
-            continue;
-    }
+    };
 
-    string key = rejected ? "Non-PLC5" : words[22];
-
-    Item item;
-    if (!itemDict.ContainsKey(key))
-    {
-        itemDict.Add(key, new Item() { name = "", tagType = "Provider", tags = new List<object>() });
-    }
-    
-    item = itemDict[key];
-
-    bool newSubItem = false;
-    var subItem = FindItem(item.tags, names[0]);
-    if (subItem == null)
-    {
-        newSubItem = true;
-        subItem = new Item() { name = names[0], tagType = "Folder" };
-    }  
-    
-    if (subItem.tags == null)
-    {
-        subItem.tags = new List<object>();
-    }     
-    if (newSubItem)
-    {
-        item.tags.Add(subItem);
-    }
-
-    var name = names[1];
-    if (names.Length > 2)
-    {
-        name += "_" + names[2];
-    }
-
-    var almName = name;
-    if (!string.IsNullOrEmpty(almName))
-    {
-        almName += "_";
-    }
-    almName += "ALM";
-
-    List<Alarm>? alarms = null;
-    if (words[6] != "F")
-    {
-        var note = words[2];
-        alarms = new List<Alarm>
-        {
-            new Alarm() { name = almName, notes = note, label = words[18],
-                priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium",
-                displayPath = new DisplayPath() }
-        };
-    }   
-
-    subItem.tags.Add(new Tag()
-    {
+    item1.tags.Add(new Tag()
+    {        
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[KOW]BinaryOutput:{0}:g10v2i{0}", words[2]),
         name = name,
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
         alarms = alarms
-    });
+    }); ;
 }
 
-foreach (var pair in itemDict)
-{
-    var json = JsonConvert.SerializeObject(pair.Value, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-    json = json.Replace("S:", "S2:");
-    File.WriteAllText(pair.Key + ".json", json.Replace("\\\\", "\\"));
+item.tags.Add(item1);
 
-    Console.WriteLine(pair.Key + ".json" + " was created successfully");
-}
+var output = Path.GetFileNameWithoutExtension(input) + ".json";
+var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+File.WriteAllText(output, json.Replace("\\\\", "\\"));
+
+Console.WriteLine(output + " was created successfully");
+
 
 Console.ReadLine();
 
@@ -151,11 +100,10 @@ class Tag
 }
 
 public class Alarm
-{
-    public float setpointA { get; set; } = 1.0f;
+{    
     public string? notes { get; set; }
     public string? name { get; set; }
-    public string? label { get; set; }
+    public string? label { get; set; } = "ELEC";
     public string? priority { get; set; } = "Medium";
     public DisplayPath? displayPath { get;set;}
 }

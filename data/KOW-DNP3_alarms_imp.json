@@ -1,0 +1,32 @@
+{
+  "name": "",
+  "tagType": "Provider",
+  "tags": [
+    {
+      "name": "Alarms",
+      "tagType": "Folder",
+      "tags": [
+      {
+      "valueSource": "opc",
+      "opcItemPath": "ns\u003d1;s\u003d[OEG_TB]BinaryOutput:29:g10v2i29",
+      "dataType": "Boolean",
+      "alarms": [
+        {
+          "notes": "KOW CONTROL POWER TROUBLE - TRANSFORMER RECTIFIER UNIT 1",
+          "name": "KOWZ01DCVOLTALARM_ALM",
+          "label": "ELEC",
+          "priority": "Medium",
+          "displayPath": {
+            "bindType": "Expression",
+            "value": "{notes}"
+          }
+        }
+      ],
+      "name": "KOWZ01DCVOLTALARM",
+      "tagType": "AtomicTag",
+      "opcServer": "Ignition OPC UA Server"
+	  }
+      ]
+    }
+  ]
+}
