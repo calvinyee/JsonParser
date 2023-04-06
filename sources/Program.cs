@@ -16,55 +16,60 @@ if (!File.Exists(input))
 }
 var lines = File.ReadAllLines(input);
 
-Item item = new Item() { name = "", tagType = "Provider", tags = new List<object>() };
-Item item1 = new Item() { name = "", tagType = "Alarm", tags = new List<object>() };
+
+Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
 
 foreach (var line in lines)
 {    
-    if (line.StartsWith(";"))
+    if (line.StartsWith("-"))
     {
         continue;
     }
-    var words = line.Split(',');
-    if (words.Length < 3)
+    var words = line.Split('|', StringSplitOptions.TrimEntries);
+    if (words.Length < 8)
     {
         continue;
     }
 
-    string name = words[0];
-    string alarm = words[1];
-    string address = words[2];
+    string fip = words[0];
+    string dev = words[4];
 
-    if (string.IsNullOrEmpty(name))
+    if (fip == "fip")
         continue;
+    
+    if (!itemDict.ContainsKey(fip))
+    {
+        itemDict.Add(fip, new Item() { name = "", tagType = "Provider", tags = new List<object>() });
+        itemDict[fip].tags.Add(new Item() { name = "", tagType = "Alarm", tags = new List<object>() });
+    }
 
-    if (name == "Name")
-        continue;
+    Item item = itemDict[fip];
+    Item alarmSubItem = item.tags[0] as Item;
 
     List<Alarm> alarms = new List<Alarm>
     {
         new Alarm()
         {
-            notes = alarm,
-            name = name + "_ALM",
+            notes = words[7],
+            name = dev + "_ALM",
+            label = words[6]
         }
     };
 
-    item1.tags.Add(new Tag()
+    alarmSubItem.tags.Add(new Tag()
     {        
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[KOW]BinaryOutput:{0}:g10v2i{0}", words[2]),
-        name = name,
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]BinaryOutput:{1}:g10v2i{1}", fip, words[2]),
+        name = dev,
         alarms = alarms
     }); ;
 }
+foreach (var pair in itemDict)
+{    
+    var json = JsonConvert.SerializeObject(pair.Value, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+    File.WriteAllText(pair.Key + ".json", json.Replace("\\\\", "\\"));
 
-item.tags.Add(item1);
-
-var output = Path.GetFileNameWithoutExtension(input) + ".json";
-var json = JsonConvert.SerializeObject(item, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-File.WriteAllText(output, json.Replace("\\\\", "\\"));
-
-Console.WriteLine(output + " was created successfully");
+    Console.WriteLine(pair.Key + ".json" + " was created successfully");
+}
 
 
 Console.ReadLine();

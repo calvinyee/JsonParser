@@ -2,7 +2,7 @@
   "profiles": {
     "JsonParser": {
       "commandName": "Project",
-      "commandLineArgs": "\"KOW-Dev-Profile 091814.csv\""
+      "commandLineArgs": "RTAC_dnp_alarm.txt"
     }
   }
 }
