@@ -40,7 +40,7 @@ foreach (var line in lines)
     if (!itemDict.ContainsKey(fip))
     {
         itemDict.Add(fip, new Item() { name = "", tagType = "Provider", tags = new List<object>() });
-        itemDict[fip].tags.Add(new Item() { name = "", tagType = "Alarm", tags = new List<object>() });
+        itemDict[fip].tags.Add(new Item() { name = "Alarm", tagType = "Folder", tags = new List<object>() });
     }
 
     Item item = itemDict[fip];
