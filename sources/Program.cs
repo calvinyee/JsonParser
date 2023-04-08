@@ -32,7 +32,7 @@ foreach (var line in lines)
     }
 
     string fip = words[0];
-    string dev = words[4];
+    string dev = words[4].Replace(".", "_");
 
     if (fip == "fip")
         continue;
