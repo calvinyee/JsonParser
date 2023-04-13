@@ -110,7 +110,7 @@ public class Alarm
     public string? name { get; set; }
     public string? label { get; set; } = "ELEC";
     public string? priority { get; set; } = "Medium";
-    public DisplayPath? displayPath { get;set;}
+    public DisplayPath? displayPath { get; set; } = new DisplayPath();
 }
 
 public class DisplayPath
