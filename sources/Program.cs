@@ -76,10 +76,10 @@ foreach (var line in lines)
         item.tags.Add(subItem);
     }
 
-    var name = names[1];
-    if (names.Length > 2)
+    var name = names[0];
+    for(int i = 1; i < names.Length; ++i)
     {
-        name += "_" + names[2];
+        name += "_" + names[i];
     }
 
     var almName = name;
