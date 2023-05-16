@@ -76,8 +76,8 @@ foreach (var line in lines)
         item.tags.Add(subItem);
     }
 
-    var name = names[0];
-    for(int i = 1; i < names.Length; ++i)
+    var name = names[1];
+    for(int i = 2; i < names.Length; ++i)
     {
         name += "_" + names[i];
     }
