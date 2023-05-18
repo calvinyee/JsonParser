@@ -74,15 +74,31 @@ foreach (var line in lines)
     if (newSubItem)
     {
         item.tags.Add(subItem);
-    }
+    }    
 
-    var name = names[1];
-    for(int i = 2; i < names.Length; ++i)
+    Item? previousLevel = subItem;
+
+    for (int i = 1; i < names.Length; ++i)
     {
-        name += "_" + names[i];
-    }
+        newSubItem = false;
+        var newItem = FindItem(previousLevel.tags, names[i]);
+        if (newItem == null)
+        {
+            newSubItem = true;
+            newItem = new Item() { name = names[i], tagType = "Folder" };
+        }
+        if (newItem.tags == null)
+        {
+            newItem.tags = new List<object>();
+        }
+        if (newSubItem)
+        {
+            previousLevel.tags.Add(newItem);
+        }
+        previousLevel = newItem;
+    } 
 
-    var almName = name;
+    var almName = names[names.Length-1];
     if (!string.IsNullOrEmpty(almName))
     {
         almName += "_";
@@ -99,11 +115,11 @@ foreach (var line in lines)
                 priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium",
                 displayPath = new DisplayPath() }
         };
-    }   
+    }
 
-    subItem.tags.Add(new Tag()
+    previousLevel.tags.Add(new Tag()
     {
-        name = name,
+        name = names[names.Length - 1],
         opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
         alarms = alarms
     });
