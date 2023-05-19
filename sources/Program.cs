@@ -80,6 +80,14 @@ foreach (var line in lines)
 
     for (int i = 1; i < names.Length; ++i)
     {
+        if (i == names.Length - 1)
+        {
+            if (names[i].Contains("_CMD") || names[i].Contains("_IND"))
+            {
+                // these are tags, not folders
+                break;
+            }
+        }
         newSubItem = false;
         var newItem = FindItem(previousLevel.tags, names[i]);
         if (newItem == null)
