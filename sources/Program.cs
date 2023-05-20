@@ -87,6 +87,11 @@ foreach (var line in lines)
                 // these are tags, not folders
                 break;
             }
+            if (words[6] != "F")
+            {
+                // alarm is not a folder
+                break;
+            }
         }
         newSubItem = false;
         var newItem = FindItem(previousLevel.tags, names[i]);
