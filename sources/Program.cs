@@ -92,6 +92,11 @@ foreach (var line in lines)
                 // alarm is not a folder
                 break;
             }
+            if (words[0] == "D")
+            {
+                // D means tag so ignore the last part
+                break;
+            }
         }
         newSubItem = false;
         var newItem = FindItem(previousLevel.tags, names[i]);
