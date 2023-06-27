@@ -18,7 +18,7 @@ var lines = File.ReadAllLines(input);
 
 Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
 
-foreach (var line in lines)
+foreach (var line in lines.Skip(1))
 {
     bool rejected = false;
     if (line.StartsWith(";"))
@@ -26,97 +26,25 @@ foreach (var line in lines)
         continue;
     }
     var words = line.Split(',');
-    if (words.Length < 30)
+    if (words.Length < 17)
     {
         continue;
-    }
-    //if (!words[22].Contains("DTS-R"))
-    //{
-    //    continue;
-    //}
-    if (!words[23].Contains(':'))
-    {
-        rejected = true;
-    }
-    var names = words[1].Split('\\');
-    if (names.Length < 2)
-    {
-        if (names.Length == 1)
-        {
-            names = new string[2] { "General", names[0] };
-        }
-        else
-            continue;
-    }
-
-    string key = rejected ? "Non-PLC5" : words[22];
+    }  
+  
+    string name = words[0].Trim('\"');
+    string almNotes = words[15].Trim('\"');
+    bool isAlarm = words[1].Trim('\"').StartsWith("1");
+    var almName = name;
 
     Item item;
-    if (!itemDict.ContainsKey(key))
+    if (!itemDict.ContainsKey(name))
     {
-        itemDict.Add(key, new Item() { name = "", tagType = "Provider", tags = new List<object>() });
+        itemDict.Add(name, new Item() { name = name, tags = new List<object>() });
     }
     
-    item = itemDict[key];
+    item = itemDict[name];       
 
-    bool newSubItem = false;
-    var subItem = FindItem(item.tags, names[0]);
-    if (subItem == null)
-    {
-        newSubItem = true;
-        subItem = new Item() { name = names[0], tagType = "Folder" };
-    }  
-    
-    if (subItem.tags == null)
-    {
-        subItem.tags = new List<object>();
-    }     
-    if (newSubItem)
-    {
-        item.tags.Add(subItem);
-    }    
-
-    Item? previousLevel = subItem;
-
-    for (int i = 1; i < names.Length; ++i)
-    {
-        if (i == names.Length - 1)
-        {
-            if (names[i].Contains("_CMD") || names[i].Contains("_IND"))
-            {
-                // these are tags, not folders
-                break;
-            }
-            if (words[6] != "F")
-            {
-                // alarm is not a folder
-                break;
-            }
-            if (words[0] == "D")
-            {
-                // D means tag so ignore the last part
-                break;
-            }
-        }
-        newSubItem = false;
-        var newItem = FindItem(previousLevel.tags, names[i]);
-        if (newItem == null)
-        {
-            newSubItem = true;
-            newItem = new Item() { name = names[i], tagType = "Folder" };
-        }
-        if (newItem.tags == null)
-        {
-            newItem.tags = new List<object>();
-        }
-        if (newSubItem)
-        {
-            previousLevel.tags.Add(newItem);
-        }
-        previousLevel = newItem;
-    } 
-
-    var almName = names[names.Length-1];
+  
     if (!string.IsNullOrEmpty(almName))
     {
         almName += "_";
@@ -124,21 +52,20 @@ foreach (var line in lines)
     almName += "ALM";
 
     List<Alarm>? alarms = null;
-    if (words[6] != "F")
-    {
-        var note = words[2];
+    if (isAlarm)
+    {      
         alarms = new List<Alarm>
         {
-            new Alarm() { name = almName, notes = note, label = words[18],
-                priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium",
+            new Alarm() { name = almName, notes = almNotes,
+                priority = (almNotes != null && almNotes.ToLower().Contains("fire")) ? "High" : "Medium",
                 displayPath = new DisplayPath() }
         };
     }
 
-    previousLevel.tags.Add(new Tag()
+    item.tags.Add(new Tag()
     {
-        name = names[names.Length - 1],
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
+        name = name,
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}","", ""),
         alarms = alarms
     });
 }
@@ -185,8 +112,7 @@ class Tag
 }
 
 public class Alarm
-{
-    public float setpointA { get; set; } = 1.0f;
+{ 
     public string? notes { get; set; }
     public string? name { get; set; }
     public string? label { get; set; }

@@ -1,0 +1,16 @@
+{
+  "valueSource": "opc",
+  "opcItemPath": "ns\u003d1;s\u003d[Test-KMA]DI_1",
+  "dataType": "Boolean",
+  "alarms": [
+    {
+      "notes": "KMA X01 SUDDEN PRESSURE TRIP",
+      "name": "MDI_X01_263SP_TRP_ALM",
+      "displayPath": "{notes}",
+      "priority": "Medium"
+    }
+  ],
+  "name": "MDI_X01_263SP_TRP",
+  "tagType": "AtomicTag",
+  "opcServer": "Ignition OPC UA Server"
+}

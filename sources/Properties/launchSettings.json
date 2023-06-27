@@ -2,7 +2,7 @@
   "profiles": {
     "JsonParser": {
       "commandName": "Project",
-      "commandLineArgs": "\"Combined_EBP-Tags All-James.csv\""
+      "commandLineArgs": "\"KMA ModbusAddr From Kepware.txt\""
     }
   }
 }
