@@ -14,13 +14,14 @@ if (!File.Exists(input))
     Console.ReadLine();
     return;
 }
+
+var output = input.Replace(Path.GetExtension(input), ".json");
 var lines = File.ReadAllLines(input);
 
-Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
+Item main = new Item() { name = "", tagType="Provider", tags = new List<object>() };
 
 foreach (var line in lines.Skip(1))
-{
-    bool rejected = false;
+{    
     if (line.StartsWith(";"))
     {
         continue;
@@ -36,14 +37,9 @@ foreach (var line in lines.Skip(1))
     bool isAlarm = words[1].Trim('\"').StartsWith("1");
     var almName = name;
 
-    Item item;
-    if (!itemDict.ContainsKey(name))
-    {
-        itemDict.Add(name, new Item() { name = name, tags = new List<object>() });
-    }
-    
-    item = itemDict[name];       
+    Item item = new Item() { name = name, tags = new List<object>() };
 
+    main.tags.Add(item);
   
     if (!string.IsNullOrEmpty(almName))
     {
@@ -65,19 +61,16 @@ foreach (var line in lines.Skip(1))
     item.tags.Add(new Tag()
     {
         name = name,
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}","", ""),
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}","KMA", ""),
         alarms = alarms
     });
 }
 
-foreach (var pair in itemDict)
-{
-    var json = JsonConvert.SerializeObject(pair.Value, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-    json = json.Replace("S:", "S2:");
-    File.WriteAllText(pair.Key + ".json", json.Replace("\\\\", "\\"));
+var json = JsonConvert.SerializeObject(main, Formatting.Indented, new JsonSerializerSettings() 
+{ NullValueHandling = NullValueHandling.Ignore });
+File.WriteAllText(output, json.Replace("\\\\", "\\"));
 
-    Console.WriteLine(pair.Key + ".json" + " was created successfully");
-}
+Console.WriteLine(output + " was created successfully");
 
 Console.ReadLine();
 
