@@ -20,8 +20,15 @@ var lines = File.ReadAllLines(input);
 
 Item main = new Item() { name = "", tagType="Provider", tags = new List<object>() };
 
+Item status = new Item() { name = "STATUS", tagType = "Folder", tags = new List<object>() };
+
+Item control = new Item() { name = "CTRL", tagType = "Folder", tags = new List<object>() };
+
+main.tags.Add(status);
+main.tags.Add(control);
+
 foreach (var line in lines.Skip(1))
-{    
+{
     if (line.StartsWith(";"))
     {
         continue;
@@ -30,17 +37,16 @@ foreach (var line in lines.Skip(1))
     if (words.Length < 17)
     {
         continue;
-    }  
-  
+    }
+
     string name = words[0].Trim('\"');
     string almNotes = words[15].Trim('\"');
     bool isAlarm = words[1].Trim('\"').StartsWith("1");
+    int pathIndex = Convert.ToInt32(words[1].Trim('\"').Substring(1));
     var almName = name;
 
     Item item = new Item() { name = name, tags = new List<object>() };
 
-    main.tags.Add(item);
-  
     if (!string.IsNullOrEmpty(almName))
     {
         almName += "_";
@@ -49,23 +55,31 @@ foreach (var line in lines.Skip(1))
 
     List<Alarm>? alarms = null;
     if (isAlarm)
-    {      
+    {
         alarms = new List<Alarm>
         {
             new Alarm() { name = almName, notes = almNotes,
-                priority = (almNotes != null && almNotes.ToLower().Contains("fire")) ? "High" : "Medium",
-                displayPath = new DisplayPath() }
+                priority = (almNotes != null && almNotes.ToLower().Contains("fire")) ? "High" : "Medium" }
         };
-    }
 
-    item.tags.Add(new Tag()
+        // status
+        status.tags.Add(new Tag()
+        {
+            name = name,
+            opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]STATUS_{1}", "KMA", pathIndex),
+            alarms = alarms
+        });
+    }   
+    else
     {
-        name = name,
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}","KMA", ""),
-        alarms = alarms
-    });
+        // control
+        control.tags.Add(new Tag()
+        {
+            name = name,
+            opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]CTRL_{1}", "KMA", pathIndex)
+        });
+    }
 }
-
 var json = JsonConvert.SerializeObject(main, Formatting.Indented, new JsonSerializerSettings() 
 { NullValueHandling = NullValueHandling.Ignore });
 File.WriteAllText(output, json.Replace("\\\\", "\\"));
@@ -110,15 +124,8 @@ public class Alarm
     public string? name { get; set; }
     public string? label { get; set; }
     public string? priority { get; set; } = "Medium";
-    public DisplayPath? displayPath { get;set;}
+    public string? displayPath { get; set; } = "{notes}";
 }
-
-public class DisplayPath
-{
-    public string? bindType { get; set; } = "Expression";
-    public string? value { get; set; } = "{notes}";
-}
-
 
 class Item
 {
