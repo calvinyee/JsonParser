@@ -20,7 +20,7 @@ Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
 
 foreach (var line in lines)
 {
-    bool rejected = false;
+    //bool rejected = false;
     if (line.StartsWith(";"))
     {
         continue;
@@ -29,15 +29,15 @@ foreach (var line in lines)
     if (words.Length < 30)
     {
         continue;
-    }
+    }  
     //if (!words[22].Contains("DTS-R"))
     //{
     //    continue;
     //}
-    if (!words[23].Contains(':'))
-    {
-        rejected = true;
-    }
+    //if (!words[23].Contains(':'))
+    //{
+    //    rejected = true;
+    //}
     var names = words[1].Split('\\');
     if (names.Length < 2)
     {
@@ -49,7 +49,12 @@ foreach (var line in lines)
             continue;
     }
 
-    string key = rejected ? "Non-PLC5" : words[22];
+    string key = /*rejected ? "Non-PLC5" :*/ words[22];
+
+    if (words[0] != "D")
+    {
+        continue;
+    }
 
     Item item;
     if (!itemDict.ContainsKey(key))
@@ -129,16 +134,15 @@ foreach (var line in lines)
         var note = words[2];
         alarms = new List<Alarm>
         {
-            new Alarm() { name = almName, notes = note, label = words[18],
-                priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium",
-                displayPath = new DisplayPath() }
+            new Alarm() { name = almName, notes = note,
+                priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium"}
         };
     }
 
     previousLevel.tags.Add(new Tag()
     {
         name = names[names.Length - 1],
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}", words[22], words[23]),
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d{0}",words[23]),
         alarms = alarms
     });
 }
@@ -185,21 +189,12 @@ class Tag
 }
 
 public class Alarm
-{
-    public float setpointA { get; set; } = 1.0f;
+{   
     public string? notes { get; set; }
-    public string? name { get; set; }
-    public string? label { get; set; }
+    public string? name { get; set; } 
     public string? priority { get; set; } = "Medium";
-    public DisplayPath? displayPath { get;set;}
+    public string? displayPath { get; set; } = "{notes}";
 }
-
-public class DisplayPath
-{
-    public string? bindType { get; set; } = "Expression";
-    public string? value { get; set; } = "{notes}";
-}
-
 
 class Item
 {
