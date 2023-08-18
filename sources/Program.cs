@@ -19,25 +19,18 @@ var lines = File.ReadAllLines(input);
 Dictionary<string, Item> itemDict = new Dictionary<string, Item>();
 
 foreach (var line in lines)
-{
-    //bool rejected = false;
+{   
     if (line.StartsWith(";"))
     {
         continue;
     }
-    var words = line.Split(',');
+    var words = line.Split(',');  
+
     if (words.Length < 30)
     {
         continue;
-    }  
-    //if (!words[22].Contains("DTS-R"))
-    //{
-    //    continue;
-    //}
-    //if (!words[23].Contains(':'))
-    //{
-    //    rejected = true;
-    //}
+    }
+   
     var names = words[1].Split('\\');
     if (names.Length < 2)
     {
@@ -51,11 +44,12 @@ foreach (var line in lines)
 
     string key = /*rejected ? "Non-PLC5" :*/ words[22];
 
-    if (words[0] != "D")
+    if (words[0] != "D" && words[0] != "A")
     {
         continue;
     }
 
+    
     Item item;
     if (!itemDict.ContainsKey(key))
     {
@@ -137,11 +131,27 @@ foreach (var line in lines)
             new Alarm() { name = almName, notes = note,
                 priority = (note != null && note.ToLower().Contains("fire")) ? "High" : "Medium"}
         };
+    }   
+
+    var dataType = "Boolean";
+    var columnI = words[8];
+    var columnJ = words[9];
+    if ((columnI == "D" && columnJ == "L") ||
+        (columnI == "I" && columnJ == "L"))
+    {
+        dataType = "Long";
+    }
+    if ((columnI == "I" && columnJ == "F") ||
+        (columnI == "U" && columnJ == "L") ||
+        (columnI == "L" && columnJ == "L"))
+    {
+        dataType = "Float";
     }
 
     previousLevel.tags.Add(new Tag()
     {
         name = names[names.Length - 1],
+        dataType = dataType,
         opcItemPath = string.Format(@"ns\u003d1;s\u003d{0}",words[23]),
         alarms = alarms
     });
