@@ -199,7 +199,8 @@ class Tag
 }
 
 public class Alarm
-{   
+{
+    public double setpointA { get; set; } = 1.0;
     public string? notes { get; set; }
     public string? name { get; set; } 
     public string? priority { get; set; } = "Medium";
