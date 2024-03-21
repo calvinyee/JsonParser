@@ -25,6 +25,10 @@ foreach (var line in lines)
         continue;
     }
     var words = line.Split(',');  
+    for(int i = 0; i < words.Length; ++i)
+    {
+        words[i] = words[i].Trim('"');
+    }
 
     if (words.Length < 30)
     {
