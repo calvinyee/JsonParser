@@ -156,7 +156,7 @@ foreach (var line in lines)
     {
         name = names[names.Length - 1],
         dataType = dataType,
-        opcItemPath = string.Format(@"ns\u003d1;s\u003d{0}",words[23]),
+        opcItemPath = string.Format(@"ns\u003d1;s\u003d[{0}]{1}",words[22], words[23]),
         alarms = alarms
     });
 }
@@ -208,8 +208,15 @@ public class Alarm
     public string? notes { get; set; }
     public string? name { get; set; } 
     public string? priority { get; set; } = "Medium";
-    public string? displayPath { get; set; } = "{notes}";
+    public DisplayPath? displayPath { get; set; } = new DisplayPath();
 }
+
+public class DisplayPath
+{
+    public string? bindType { get; set; } = "Expression";
+    public string? value { get; set; } = "{notes}";
+}
+
 
 class Item
 {
